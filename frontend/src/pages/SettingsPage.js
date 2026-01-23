@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import axios from 'axios';
 import {
@@ -27,12 +29,16 @@ import {
   Crown,
   CreditCard,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  Sun,
+  Moon,
+  Monitor
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 const SettingsPage = () => {
+  const { theme, toggleTheme } = useTheme();
   const { user, logout, updateProfile, checkAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
