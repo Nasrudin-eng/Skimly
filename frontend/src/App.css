@@ -1,34 +1,116 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App-specific styles */
+.hero-gradient {
+    background: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.feature-card {
+    @apply bg-card border border-border rounded-2xl p-6 transition-all duration-300;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.feature-card:hover {
+    @apply shadow-lg -translate-y-1 border-primary/20;
 }
 
-.App-link {
-    color: #61dafb;
+.knowledge-card {
+    @apply bg-card border border-border rounded-xl p-5 transition-all duration-200;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.knowledge-card:hover {
+    @apply shadow-md border-primary/30;
+}
+
+/* Analysis output styling */
+.analysis-section {
+    @apply bg-muted/50 rounded-lg p-4 mb-3;
+}
+
+.analysis-section h4 {
+    @apply text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wide;
+}
+
+.analysis-section ul {
+    @apply space-y-2;
+}
+
+.analysis-section li {
+    @apply text-foreground/90 leading-relaxed;
+}
+
+/* Tag styles */
+.tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground;
+}
+
+.tag-primary {
+    @apply bg-primary/10 text-primary;
+}
+
+/* Sidebar navigation */
+.nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground transition-colors;
+}
+
+.nav-item:hover {
+    @apply bg-muted text-foreground;
+}
+
+.nav-item.active {
+    @apply bg-primary/10 text-primary font-medium;
+}
+
+/* Input focus styles */
+.input-underline {
+    @apply bg-transparent border-0 border-b-2 border-border focus:border-primary focus:ring-0 rounded-none px-0 py-3 text-lg transition-colors;
+}
+
+/* Button variations */
+.btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-3 font-medium transition-all hover:scale-[1.02] active:scale-[0.98];
+}
+
+.btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full px-6 py-2.5 font-medium transition-all;
+}
+
+.btn-ghost {
+    @apply hover:bg-muted text-foreground/80 hover:text-foreground rounded-lg px-4 py-2 transition-colors;
+}
+
+/* Dashboard grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Empty state */
+.empty-state {
+    @apply flex flex-col items-center justify-center py-16 text-center;
+}
+
+.empty-state-icon {
+    @apply w-16 h-16 text-muted-foreground/30 mb-4;
+}
+
+/* Loading skeleton */
+.skeleton {
+    @apply animate-pulse bg-muted rounded;
+}
+
+/* Floating action button */
+.fab {
+    @apply fixed bottom-8 right-8 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 hover:shadow-xl;
+}
+
+/* Chat bubble (Ask Your Brain) */
+.chat-bubble {
+    @apply max-w-[80%] rounded-2xl px-4 py-3;
+}
+
+.chat-bubble.user {
+    @apply bg-primary text-primary-foreground ml-auto rounded-br-sm;
+}
+
+.chat-bubble.ai {
+    @apply bg-muted text-foreground mr-auto rounded-bl-sm;
 }
