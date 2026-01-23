@@ -106,6 +106,43 @@ const api = {
       withCredentials: true
     });
     return response.data;
+  },
+
+  // Get recommendations
+  getRecommendations: async () => {
+    const response = await axios.get(`${API}/recommendations`, {
+      headers: getAuthHeaders(),
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // Password reset
+  forgotPassword: async (email) => {
+    const response = await axios.post(`${API}/auth/forgot-password`, { email });
+    return response.data;
+  },
+
+  resetPassword: async (token, newPassword) => {
+    const response = await axios.post(`${API}/auth/reset-password`, {
+      token,
+      new_password: newPassword
+    });
+    return response.data;
+  },
+
+  // Email verification
+  verifyEmail: async (token) => {
+    const response = await axios.post(`${API}/auth/verify-email`, { token });
+    return response.data;
+  },
+
+  resendVerification: async () => {
+    const response = await axios.post(`${API}/auth/resend-verification`, {}, {
+      headers: getAuthHeaders(),
+      withCredentials: true
+    });
+    return response.data;
   }
 };
 
