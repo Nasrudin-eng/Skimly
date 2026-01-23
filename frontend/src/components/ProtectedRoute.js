@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
   // If user data was passed from AuthCallback, skip loading
@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated && !user) {
     return <Navigate to="/auth" replace />;
   }
 
