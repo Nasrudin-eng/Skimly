@@ -86,7 +86,7 @@ class SkimlyAPITester:
         
         # Generate unique test user
         timestamp = int(time.time())
-        test_email = f"test_{timestamp}@skimly.test"
+        test_email = f"test_{timestamp}@example.com"
         test_password = "TestPass123!"
         test_name = f"Test User {timestamp}"
 
