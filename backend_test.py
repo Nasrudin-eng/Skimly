@@ -461,6 +461,11 @@ class SkimlyAPITester:
             self.test_pro_features()
             self.test_profile_management()
             self.test_export_functionality()
+            
+            # Test new features
+            self.test_password_reset_flow()
+            self.test_payment_endpoints()
+            self.test_recommendations_endpoint()
         
         # Test logout
         if self.token:
