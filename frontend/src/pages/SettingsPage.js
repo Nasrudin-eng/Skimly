@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import axios from 'axios';
 import {
   Brain,
   Sparkles,
@@ -23,12 +24,18 @@ import {
   Plus,
   X,
   Loader2,
-  Crown
+  Crown,
+  CreditCard,
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
 const SettingsPage = () => {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, checkAuth } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   const [name, setName] = useState(user?.name || '');
   const [interests, setInterests] = useState(user?.interests || []);
@@ -42,6 +49,65 @@ const SettingsPage = () => {
   const [newTheme, setNewTheme] = useState('');
   
   const [saving, setSaving] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+
+  // Check for payment callback
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    const sessionId = searchParams.get('session_id');
+    
+    if (payment === 'success' && sessionId) {
+      checkPaymentStatus(sessionId);
+    } else if (payment === 'cancelled') {
+      toast.error('Payment was cancelled');
+      // Clear URL params
+      navigate('/settings', { replace: true });
+    }
+  }, [searchParams]);
+
+  const checkPaymentStatus = async (sessionId) => {
+    setCheckingPayment(true);
+    try {
+      const token = localStorage.getItem('skimly_token');
+      const response = await axios.get(`${API}/payments/status/${sessionId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        withCredentials: true
+      });
+      
+      if (response.data.payment_status === 'paid') {
+        toast.success('🎉 Welcome to Skimly Pro!');
+        // Refresh user data
+        await checkAuth();
+      }
+    } catch (error) {
+      console.error('Payment check error:', error);
+    } finally {
+      setCheckingPayment(false);
+      // Clear URL params
+      navigate('/settings', { replace: true });
+    }
+  };
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const token = localStorage.getItem('skimly_token');
+      const response = await axios.post(`${API}/payments/checkout`, 
+        { origin_url: window.location.origin },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          withCredentials: true
+        }
+      );
+      
+      // Redirect to Stripe checkout
+      window.location.href = response.data.checkout_url;
+    } catch (error) {
+      toast.error('Failed to start checkout');
+      setUpgrading(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
