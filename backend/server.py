@@ -1276,6 +1276,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Initialize background scheduler on startup"""
+    init_scheduler(db, email_service)
+    logger.info("Skimly API started with background scheduler")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    """Cleanup on shutdown"""
+    shutdown_scheduler()
     client.close()
+    logger.info("Skimly API shutdown complete")
