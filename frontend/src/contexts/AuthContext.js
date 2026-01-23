@@ -9,22 +9,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('skimly_token'));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const checkAuth = useCallback(async () => {
+    const storedToken = localStorage.getItem('skimly_token');
+    if (!storedToken) {
+      setLoading(false);
+      setIsAuthenticated(false);
+      return;
+    }
+    
     try {
       const response = await axios.get(`${API}/auth/me`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: { Authorization: `Bearer ${storedToken}` },
         withCredentials: true
       });
       setUser(response.data);
+      setToken(storedToken);
+      setIsAuthenticated(true);
     } catch (error) {
       setUser(null);
       setToken(null);
+      setIsAuthenticated(false);
       localStorage.removeItem('skimly_token');
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     checkAuth();
@@ -36,9 +47,10 @@ export const AuthProvider = ({ children }) => {
       { withCredentials: true }
     );
     const { token: newToken, user: userData } = response.data;
+    localStorage.setItem('skimly_token', newToken);
     setToken(newToken);
     setUser(userData);
-    localStorage.setItem('skimly_token', newToken);
+    setIsAuthenticated(true);
     return userData;
   };
 
@@ -48,9 +60,10 @@ export const AuthProvider = ({ children }) => {
       { withCredentials: true }
     );
     const { token: newToken, user: userData } = response.data;
+    localStorage.setItem('skimly_token', newToken);
     setToken(newToken);
     setUser(userData);
-    localStorage.setItem('skimly_token', newToken);
+    setIsAuthenticated(true);
     return userData;
   };
 
@@ -66,9 +79,10 @@ export const AuthProvider = ({ children }) => {
       { withCredentials: true }
     );
     const { token: newToken, user: userData } = response.data;
+    localStorage.setItem('skimly_token', newToken);
     setToken(newToken);
     setUser(userData);
-    localStorage.setItem('skimly_token', newToken);
+    setIsAuthenticated(true);
     return userData;
   };
 
@@ -80,6 +94,7 @@ export const AuthProvider = ({ children }) => {
     }
     setUser(null);
     setToken(null);
+    setIsAuthenticated(false);
     localStorage.removeItem('skimly_token');
   };
 
@@ -97,6 +112,7 @@ export const AuthProvider = ({ children }) => {
       user,
       loading,
       token,
+      isAuthenticated,
       login,
       register,
       loginWithGoogle,
