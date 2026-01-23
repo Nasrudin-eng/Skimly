@@ -117,6 +117,15 @@ const AuthPage = () => {
                         data-testid="login-password-input"
                       />
                     </div>
+                    <div className="text-right">
+                      <Link 
+                        to="/forgot-password" 
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        data-testid="forgot-password-link"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                   </div>
                   
                   <Button 
