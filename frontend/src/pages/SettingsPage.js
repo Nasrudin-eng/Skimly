@@ -330,6 +330,41 @@ const SettingsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Appearance Card */}
+          <Card className="border-border/50 mb-6">
+            <CardHeader>
+              <CardTitle className="text-xl font-medium flex items-center gap-2">
+                {theme === 'dark' ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+                Appearance
+              </CardTitle>
+              <CardDescription>Customize how Skimly looks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-primary/20' : 'bg-muted'}`}>
+                    {theme === 'dark' ? (
+                      <Moon className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Sun className="w-5 h-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium">Dark Mode</p>
+                    <p className="text-sm text-muted-foreground">
+                      {theme === 'dark' ? 'Currently using dark theme' : 'Currently using light theme'}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={theme === 'dark'}
+                  onCheckedChange={toggleTheme}
+                  data-testid="dark-mode-toggle"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Intelligence Profile */}
           <Card className="border-border/50 mb-6">
             <CardHeader>
