@@ -3,7 +3,7 @@
 ## Overview
 **Product Name:** Skimly  
 **Tagline:** Everything you read makes you smarter forever  
-**Version:** 1.0.0 MVP  
+**Version:** 1.1.0 (Full MVP)  
 **Last Updated:** January 23, 2026
 
 ## Product Summary
@@ -43,6 +43,8 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 - [x] Google OAuth social login (via Emergent Auth)
 - [x] Session management with 7-day expiry
 - [x] Protected routes
+- [x] Password reset flow with email
+- [x] Email verification support
 
 ### AI Analysis Engine
 - [x] Text analysis using OpenAI GPT-5.2
@@ -75,6 +77,24 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 - [x] Side panel for analysis results
 - [x] Popup with stats
 
+### Payments (Stripe)
+- [x] Pro tier checkout ($12/month)
+- [x] Payment status verification
+- [x] Automatic tier upgrade on payment
+- [x] Webhook handling
+
+### Email Service (SendGrid)
+- [x] Password reset emails
+- [x] Weekly digest emails (Pro)
+- [x] Upgrade confirmation emails
+- [x] Email verification
+
+### Recommendation Engine
+- [x] Knowledge gap detection
+- [x] Revisit old knowledge suggestions
+- [x] Goal-based recommendations
+- [x] Diversity recommendations
+
 ---
 
 ## What's Been Implemented
@@ -98,6 +118,14 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 - Weekly Intelligence Digest (Pro only)
 - Top insights aggregation
 - Pending actions compilation
+
+### Phase 4 - Full MVP ✅ (January 23, 2026)
+- **Stripe Payment Integration**: Pro tier checkout with $12/mo subscription
+- **Email Service**: SendGrid integration for password reset, verification, digests
+- **Password Reset Flow**: Forgot password and reset password pages with secure tokens
+- **Recommendation Engine**: Personalized suggestions based on knowledge patterns
+- **Email Verification**: Token-based email verification system
+- **Weekly Digest Emails**: Automated email delivery for Pro users
 
 ---
 
@@ -128,6 +156,8 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 | Database | MongoDB (with vector search) |
 | AI | OpenAI GPT-5.2 via emergentintegrations |
 | Auth | JWT + Emergent Google OAuth |
+| Payments | Stripe via emergentintegrations |
+| Email | SendGrid |
 | Extension | Chrome Manifest V3 |
 
 ---
@@ -141,6 +171,10 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 | POST | /api/auth/google/session | Google OAuth callback |
 | GET | /api/auth/me | Get current user |
 | POST | /api/auth/logout | Logout |
+| POST | /api/auth/forgot-password | Request password reset |
+| POST | /api/auth/reset-password | Reset password with token |
+| POST | /api/auth/verify-email | Verify email with token |
+| POST | /api/auth/resend-verification | Resend verification email |
 | PUT | /api/profile | Update profile |
 | POST | /api/analyze | Analyze text |
 | POST | /api/save | Save to knowledge base |
@@ -153,19 +187,23 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 | GET | /api/digest | Weekly digest (Pro) |
 | GET | /api/stats | User statistics |
 | GET | /api/export | Export knowledge |
+| POST | /api/payments/checkout | Create Stripe checkout |
+| GET | /api/payments/status/{id} | Check payment status |
+| POST | /api/webhook/stripe | Stripe webhook |
+| GET | /api/recommendations | Get recommendations |
+| POST | /api/admin/send-digests | Trigger digest emails |
 
 ---
 
 ## Prioritized Backlog
 
-### P0 - Critical (Next Sprint)
-- [ ] Stripe payment integration for Pro tier
-- [ ] Email verification for registration
-- [ ] Password reset functionality
+### P0 - Critical (Completed ✅)
+- [x] Stripe payment integration for Pro tier
+- [x] Email verification for registration
+- [x] Password reset functionality
 
 ### P1 - High Priority
-- [ ] Weekly digest email automation
-- [ ] Recommendation engine
+- [ ] Weekly digest email cron job automation
 - [ ] Knowledge item editing
 - [ ] Bulk operations (delete, tag)
 
@@ -196,31 +234,14 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 
 ---
 
-## Design System
-
-### Colors
-- Primary: #2E5C55 (Deep Forest Green)
-- Accent: #D97757 (Terracotta)
-- Background: #FDFCF8 (Warm Paper)
-
-### Typography
-- Headings: Fraunces (serif)
-- Body: Inter (sans-serif)
-
-### Visual Style
-- "Intellectual Zen" - calm, focused, premium
-- Paper-like textures
-- Generous whitespace
-- Subtle animations
-
----
-
 ## File Structure
 
 ```
 /app/
 ├── backend/
 │   ├── server.py          # FastAPI application
+│   ├── email_service.py   # SendGrid email integration
+│   ├── payment_service.py # Stripe payment integration
 │   ├── requirements.txt   # Python dependencies
 │   └── .env               # Environment variables
 ├── frontend/
@@ -245,8 +266,8 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 
 ## Next Tasks
 
-1. **Stripe Integration** - Enable Pro subscriptions
-2. **Email Notifications** - SendGrid for digests
-3. **Chrome Web Store** - Publish extension
-4. **Marketing Site** - SEO optimization
-5. **User Onboarding** - Tutorial flow for new users
+1. **Cron Job Setup** - Automate weekly digest email delivery
+2. **Chrome Web Store** - Publish extension
+3. **Marketing Site** - SEO optimization
+4. **User Onboarding** - Tutorial flow for new users
+5. **Mobile Optimization** - Responsive design improvements
