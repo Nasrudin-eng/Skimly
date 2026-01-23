@@ -218,26 +218,82 @@ const SettingsPage = () => {
           {/* Plan Card */}
           <Card className="border-border/50 mb-6">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user?.tier === 'pro' ? 'bg-accent/20' : 'bg-muted'}`}>
-                    <Crown className={`w-6 h-6 ${user?.tier === 'pro' ? 'text-accent' : 'text-muted-foreground'}`} />
+              {checkingPayment ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  <span>Verifying payment...</span>
+                </div>
+              ) : user?.tier === 'pro' ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-accent/20">
+                      <Crown className="w-6 h-6 text-accent" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">Pro Plan</h3>
+                        <Badge className="bg-accent text-white">Active</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Unlimited access to all features
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium capitalize">{user?.tier} Plan</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {user?.tier === 'pro' 
-                        ? 'Unlimited access to all features' 
-                        : '10 analyses per day'}
-                    </p>
+                  <CheckCircle className="w-8 h-8 text-primary" />
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-muted">
+                        <Crown className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Free Plan</h3>
+                        <p className="text-sm text-muted-foreground">
+                          10 analyses per day
+                        </p>
+                      </div>
+                    </div>
+                    <Button 
+                      className="rounded-full" 
+                      onClick={handleUpgrade}
+                      disabled={upgrading}
+                      data-testid="upgrade-btn"
+                    >
+                      {upgrading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Upgrade to Pro - $12/mo
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  <div className="bg-muted/50 rounded-lg p-4 mt-4">
+                    <p className="text-sm font-medium mb-2">Pro includes:</p>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" /> Unlimited analyses
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" /> Ask Your Brain - query your knowledge
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" /> Weekly Intelligence Digests
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary" /> Priority support
+                      </li>
+                    </ul>
                   </div>
                 </div>
-                {user?.tier === 'free' && (
-                  <Button className="rounded-full" data-testid="upgrade-btn">
-                    Upgrade to Pro
-                  </Button>
-                )}
-              </div>
+              )}
             </CardContent>
           </Card>
 
