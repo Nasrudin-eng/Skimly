@@ -396,6 +396,55 @@ const Dashboard = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Recommendations */}
+          {recommendations.length > 0 && (
+            <Card className="border-border/50 mt-8" data-testid="recommendations-section">
+              <CardHeader>
+                <CardTitle className="text-xl font-medium flex items-center gap-2">
+                  <Compass className="w-5 h-5 text-accent" />
+                  Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {recommendations.map((rec, i) => {
+                    const IconComponent = getRecIcon(rec.type);
+                    return (
+                      <div 
+                        key={i} 
+                        className="flex gap-3 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                        data-testid={`recommendation-${i}`}
+                      >
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                          rec.type === 'revisit' ? 'bg-primary/10' :
+                          rec.type === 'gap' ? 'bg-accent/10' :
+                          'bg-secondary'
+                        }`}>
+                          <IconComponent className={`w-5 h-5 ${
+                            rec.type === 'revisit' ? 'text-primary' :
+                            rec.type === 'gap' ? 'text-accent' :
+                            'text-muted-foreground'
+                          }`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{rec.title}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2">{rec.description}</p>
+                        </div>
+                        {rec.item_id && (
+                          <Link to={`/knowledge/${rec.item_id}`}>
+                            <Button variant="ghost" size="sm">
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
     </div>
