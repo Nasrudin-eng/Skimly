@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { login, register, loginWithGoogle } = useAuth();
+  const { login, register, loginWithGoogle, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   
   // Login form state
@@ -23,14 +23,20 @@ const AuthPage = () => {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await login(loginEmail, loginPassword);
       toast.success('Welcome back!');
-      // Small delay to ensure state updates before navigation
-      setTimeout(() => navigate('/dashboard'), 100);
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Login failed');
       setLoading(false);
@@ -43,8 +49,7 @@ const AuthPage = () => {
     try {
       await register(registerName, registerEmail, registerPassword);
       toast.success('Account created! Welcome to Skimly.');
-      // Small delay to ensure state updates before navigation
-      setTimeout(() => navigate('/dashboard'), 100);
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed');
       setLoading(false);
