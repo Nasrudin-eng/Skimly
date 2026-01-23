@@ -348,6 +348,101 @@ class SkimlyAPITester:
         
         return success
 
+    def test_password_reset_flow(self):
+        """Test password reset functionality"""
+        self.log("\n=== PASSWORD RESET TESTS ===")
+        
+        # Test forgot password endpoint
+        success, response = self.run_test(
+            "Forgot Password",
+            "POST",
+            "auth/forgot-password",
+            200,
+            data={"email": "test@example.com"}
+        )
+        
+        if success:
+            self.log("   Forgot password request processed")
+        
+        # Test reset password with invalid token
+        self.run_test(
+            "Reset Password (Invalid Token)",
+            "POST",
+            "auth/reset-password",
+            400,
+            data={
+                "token": "invalid_token_12345",
+                "new_password": "NewPassword123!"
+            }
+        )
+        
+        return success
+
+    def test_payment_endpoints(self):
+        """Test Stripe payment integration"""
+        self.log("\n=== PAYMENT TESTS ===")
+        
+        if not self.token:
+            self.log("❌ No auth token, skipping payment tests")
+            return False
+
+        # Test checkout creation
+        success, response = self.run_test(
+            "Create Checkout Session",
+            "POST",
+            "payments/checkout",
+            200,
+            data={"origin_url": "https://example.com"}
+        )
+        
+        session_id = None
+        if success and 'session_id' in response:
+            session_id = response['session_id']
+            self.log(f"   Created checkout session: {session_id}")
+        
+        # Test payment status check
+        if session_id:
+            success, status_response = self.run_test(
+                "Check Payment Status",
+                "GET",
+                f"payments/status/{session_id}",
+                200
+            )
+            
+            if success:
+                self.log(f"   Payment status: {status_response.get('status', 'unknown')}")
+        
+        return success
+
+    def test_recommendations_endpoint(self):
+        """Test recommendations engine"""
+        self.log("\n=== RECOMMENDATIONS TESTS ===")
+        
+        if not self.token:
+            self.log("❌ No auth token, skipping recommendations tests")
+            return False
+
+        success, response = self.run_test("Get Recommendations", "GET", "recommendations", 200)
+        
+        if success:
+            if isinstance(response, list):
+                self.log(f"   Received {len(response)} recommendations")
+                
+                # Check recommendation structure
+                for i, rec in enumerate(response[:3]):  # Check first 3
+                    required_fields = ['type', 'title', 'description']
+                    for field in required_fields:
+                        if field not in rec:
+                            self.log(f"❌ Recommendation {i} missing field: {field}")
+                            return False
+                
+                self.log("   Recommendations have correct structure")
+            else:
+                self.log("❌ Recommendations should be a list")
+                return False
+        
+        return success
+
     def run_all_tests(self):
         """Run complete test suite"""
         self.log("🚀 Starting Skimly API Test Suite")
