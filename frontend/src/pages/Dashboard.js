@@ -54,14 +54,25 @@ const Dashboard = () => {
     try {
       const [statsData, historyData, recsData] = await Promise.all([
         api.getStats(),
-        api.getHistory({ limit: 5 })
+        api.getHistory({ limit: 5 }),
+        api.getRecommendations()
       ]);
       setStats(statsData);
       setRecentItems(historyData.items);
+      setRecommendations(recsData);
     } catch (error) {
       console.error('Failed to load dashboard:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getRecIcon = (type) => {
+    switch (type) {
+      case 'revisit': return RotateCcw;
+      case 'gap': return AlertCircle;
+      case 'read_next': return Compass;
+      default: return Lightbulb;
     }
   };
 
