@@ -29,10 +29,10 @@ const AuthPage = () => {
     try {
       await login(loginEmail, loginPassword);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      // Small delay to ensure state updates before navigation
+      setTimeout(() => navigate('/dashboard'), 100);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Login failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -43,10 +43,10 @@ const AuthPage = () => {
     try {
       await register(registerName, registerEmail, registerPassword);
       toast.success('Account created! Welcome to Skimly.');
-      navigate('/dashboard');
+      // Small delay to ensure state updates before navigation
+      setTimeout(() => navigate('/dashboard'), 100);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed');
-    } finally {
       setLoading(false);
     }
   };
