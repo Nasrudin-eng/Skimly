@@ -271,8 +271,11 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 
 ## Next Tasks
 
-1. **Cron Job Setup** - Automate weekly digest email delivery
+1. **SendGrid Sender Verification** - Add verified sender in SendGrid dashboard:
+   - Go to Settings → Sender Authentication in SendGrid
+   - Verify a sender email (e.g., noreply@yourdomain.com) OR
+   - Authenticate your domain for full email functionality
+   
 2. **Chrome Web Store** - Publish extension
-3. **Marketing Site** - SEO optimization
-4. **User Onboarding** - Tutorial flow for new users
-5. **Mobile Optimization** - Responsive design improvements
+3. **User Onboarding** - Tutorial flow for new users
+4. **Analytics** - Add usage tracking
