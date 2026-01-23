@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skimly - Analysis</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E5C55" stroke-width="2">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        <span>Skimly</span>
+      </div>
+    </header>
+
+    <!-- Loading -->
+    <div id="loading" class="screen">
+      <div class="spinner"></div>
+      <p>Analyzing...</p>
+    </div>
+
+    <!-- Login Required -->
+    <div id="login-required" class="screen">
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666660" stroke-width="1.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <h3>Sign in Required</h3>
+        <p>Sign in to analyze and save knowledge.</p>
+        <button id="sidepanel-login" class="btn primary">Sign In</button>
+      </div>
+    </div>
+
+    <!-- No Analysis -->
+    <div id="no-analysis" class="screen">
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#666660" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <h3>Ready to Analyze</h3>
+        <p>Select text on any webpage and click the Skimly button or use <kbd>Ctrl+Shift+S</kbd></p>
+      </div>
+    </div>
+
+    <!-- Analysis Result -->
+    <div id="analysis-result" class="screen">
+      <div class="result-content">
+        <div class="source-info">
+          <span id="source-title"></span>
+        </div>
+        
+        <div class="original-text">
+          <h4>Original Text</h4>
+          <p id="original-text-content"></p>
+        </div>
+
+        <div class="section" id="key-points-section">
+          <h4>💡 Key Points</h4>
+          <ul id="key-points"></ul>
+        </div>
+
+        <div class="section" id="implications-section">
+          <h4>📈 Implications</h4>
+          <ul id="implications"></ul>
+        </div>
+
+        <div class="section" id="actions-section">
+          <h4>🎯 Actions</h4>
+          <ul id="actions"></ul>
+        </div>
+
+        <div class="section" id="questions-section">
+          <h4>❓ Questions</h4>
+          <ul id="questions"></ul>
+        </div>
+
+        <div class="section" id="relevance-section">
+          <h4>👤 Personal Relevance</h4>
+          <ul id="relevance"></ul>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <button id="save-btn" class="btn primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Save to Knowledge Base
+        </button>
+      </div>
+    </div>
+
+    <!-- Saved Confirmation -->
+    <div id="saved" class="screen">
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2E5C55" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <h3>Saved!</h3>
+        <p>Knowledge added to your base.</p>
+        <button id="analyze-more" class="btn secondary">Analyze More</button>
+      </div>
+    </div>
+  </div>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
