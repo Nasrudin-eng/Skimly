@@ -23,7 +23,11 @@ import {
   Users,
   TrendingUp,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
+  Compass,
+  RotateCcw,
+  AlertCircle
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -33,6 +37,7 @@ const Dashboard = () => {
   
   const [stats, setStats] = useState(null);
   const [recentItems, setRecentItems] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Analyze form
@@ -47,7 +52,7 @@ const Dashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [statsData, historyData] = await Promise.all([
+      const [statsData, historyData, recsData] = await Promise.all([
         api.getStats(),
         api.getHistory({ limit: 5 })
       ]);
