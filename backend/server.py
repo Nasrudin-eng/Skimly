@@ -117,6 +117,34 @@ class TokenResponse(BaseModel):
     token: str
     user: UserProfile
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+class CheckoutRequest(BaseModel):
+    origin_url: str
+
+class CheckoutResponse(BaseModel):
+    checkout_url: str
+    session_id: str
+
+class PaymentStatusResponse(BaseModel):
+    status: str
+    payment_status: str
+    tier: str
+
+class RecommendationItem(BaseModel):
+    type: str  # 'read_next', 'revisit', 'gap', 'contradiction'
+    title: str
+    description: str
+    item_id: Optional[str] = None
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
