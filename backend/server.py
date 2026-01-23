@@ -23,6 +23,7 @@ load_dotenv(ROOT_DIR / '.env')
 # Import services
 from email_service import email_service
 from payment_service import payment_service
+from scheduler import init_scheduler, shutdown_scheduler
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
