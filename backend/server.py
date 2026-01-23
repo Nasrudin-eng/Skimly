@@ -980,6 +980,289 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+# ==================== PAYMENTS ====================
+
+@api_router.post("/payments/checkout", response_model=CheckoutResponse)
+async def create_checkout(request: CheckoutRequest, user: dict = Depends(get_current_user)):
+    """Create Stripe checkout session for Pro upgrade"""
+    if user.get("tier") == "pro":
+        raise HTTPException(status_code=400, detail="Already on Pro tier")
+    
+    try:
+        # Ensure origin_url ends with /
+        host_url = request.origin_url.rstrip('/') + '/'
+        
+        session = await payment_service.create_pro_checkout_session(
+            user_id=user["user_id"],
+            user_email=user["email"],
+            host_url=host_url
+        )
+        
+        # Create payment transaction record
+        await db.payment_transactions.insert_one({
+            "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
+            "session_id": session.session_id,
+            "user_id": user["user_id"],
+            "email": user["email"],
+            "amount": 12.00,
+            "currency": "usd",
+            "plan": "pro",
+            "status": "initiated",
+            "payment_status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return CheckoutResponse(
+            checkout_url=session.url,
+            session_id=session.session_id
+        )
+    except Exception as e:
+        logger.error(f"Checkout error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create checkout session")
+
+@api_router.get("/payments/status/{session_id}", response_model=PaymentStatusResponse)
+async def get_payment_status(session_id: str, request: Request, user: dict = Depends(get_current_user)):
+    """Check payment status and upgrade user if successful"""
+    try:
+        # Get origin from request
+        origin = request.headers.get('origin', str(request.base_url).rstrip('/'))
+        host_url = origin.rstrip('/') + '/'
+        
+        status = await payment_service.get_checkout_status(session_id, host_url)
+        
+        # Update transaction record
+        await db.payment_transactions.update_one(
+            {"session_id": session_id},
+            {"$set": {
+                "status": status.status,
+                "payment_status": status.payment_status,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        # If payment successful, upgrade user to Pro
+        current_tier = user.get("tier", "free")
+        if status.payment_status == "paid" and current_tier != "pro":
+            # Check if already processed
+            txn = await db.payment_transactions.find_one({"session_id": session_id}, {"_id": 0})
+            if txn and txn.get("processed"):
+                return PaymentStatusResponse(
+                    status=status.status,
+                    payment_status=status.payment_status,
+                    tier="pro"
+                )
+            
+            # Upgrade user
+            await db.users.update_one(
+                {"user_id": user["user_id"]},
+                {"$set": {
+                    "tier": "pro",
+                    "upgraded_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            # Mark transaction as processed
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {"processed": True}}
+            )
+            
+            # Send confirmation email
+            email_service.send_upgrade_confirmation(user["email"], user["name"])
+            
+            return PaymentStatusResponse(
+                status=status.status,
+                payment_status=status.payment_status,
+                tier="pro"
+            )
+        
+        return PaymentStatusResponse(
+            status=status.status,
+            payment_status=status.payment_status,
+            tier=current_tier
+        )
+    except Exception as e:
+        logger.error(f"Payment status error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to check payment status")
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    try:
+        body = await request.body()
+        signature = request.headers.get("Stripe-Signature")
+        origin = request.headers.get('origin', str(request.base_url).rstrip('/'))
+        host_url = origin.rstrip('/') + '/'
+        
+        webhook_response = await payment_service.handle_webhook(body, signature, host_url)
+        
+        if webhook_response.payment_status == "paid":
+            user_id = webhook_response.metadata.get("user_id")
+            if user_id:
+                await db.users.update_one(
+                    {"user_id": user_id},
+                    {"$set": {
+                        "tier": "pro",
+                        "upgraded_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                # Update transaction
+                await db.payment_transactions.update_one(
+                    {"session_id": webhook_response.session_id},
+                    {"$set": {
+                        "status": "complete",
+                        "payment_status": "paid",
+                        "processed": True
+                    }}
+                )
+        
+        return {"received": True}
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return {"received": True}  # Always return 200 to Stripe
+
+# ==================== RECOMMENDATIONS ====================
+
+@api_router.get("/recommendations", response_model=List[RecommendationItem])
+async def get_recommendations(user: dict = Depends(get_current_user)):
+    """Get personalized recommendations based on knowledge patterns"""
+    recommendations = []
+    
+    # Get user's knowledge items
+    items = await db.knowledge_items.find(
+        {"user_id": user["user_id"]},
+        {"_id": 0, "embedding": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    if not items:
+        recommendations.append(RecommendationItem(
+            type="read_next",
+            title="Start Your Knowledge Journey",
+            description="Analyze your first piece of content to begin building your second brain."
+        ))
+        return recommendations
+    
+    # Analyze patterns
+    all_tags = []
+    all_key_points = []
+    recent_topics = set()
+    older_items = []
+    
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+    
+    for item in items:
+        all_tags.extend(item.get("tags", []))
+        analysis = item.get("analysis", {})
+        all_key_points.extend(analysis.get("key_points", []))
+        
+        created_at = item.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        if created_at and created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+        
+        if created_at and created_at > week_ago:
+            # Recent item - track topics
+            if item.get("source_title"):
+                recent_topics.add(item["source_title"][:50])
+        elif created_at and created_at < month_ago:
+            older_items.append(item)
+    
+    # Recommendation: Revisit old knowledge
+    if older_items:
+        old_item = older_items[0]
+        recommendations.append(RecommendationItem(
+            type="revisit",
+            title="Revisit Your Knowledge",
+            description=f"It's been a while since you captured: \"{old_item.get('original_text', '')[:100]}...\"",
+            item_id=old_item.get("item_id")
+        ))
+    
+    # Recommendation: Knowledge gaps based on user interests
+    user_interests = user.get("interests", [])
+    user_goals = user.get("goals", [])
+    
+    if user_interests:
+        # Find interests not well represented in knowledge
+        tag_counts = {}
+        for tag in all_tags:
+            tag_counts[tag.lower()] = tag_counts.get(tag.lower(), 0) + 1
+        
+        for interest in user_interests[:3]:
+            interest_lower = interest.lower()
+            if tag_counts.get(interest_lower, 0) < 3:
+                recommendations.append(RecommendationItem(
+                    type="gap",
+                    title=f"Explore: {interest}",
+                    description=f"You've shown interest in {interest} but have limited knowledge captured. Consider reading more about it."
+                ))
+    
+    # Recommendation: Based on goals
+    if user_goals:
+        goal = user_goals[0]
+        recommendations.append(RecommendationItem(
+            type="read_next",
+            title=f"Work Towards: {goal}",
+            description=f"Find content related to your goal: \"{goal}\" and analyze it to build relevant knowledge."
+        ))
+    
+    # Recommendation: Suggest exploring new areas
+    if len(items) > 10:
+        recommendations.append(RecommendationItem(
+            type="read_next",
+            title="Diversify Your Knowledge",
+            description="Try exploring a completely new topic to broaden your perspective."
+        ))
+    
+    return recommendations[:5]
+
+# ==================== SEND WEEKLY DIGEST ====================
+
+@api_router.post("/admin/send-digests")
+async def send_weekly_digests(background_tasks: BackgroundTasks):
+    """Admin endpoint to trigger weekly digest emails for Pro users"""
+    # This would typically be called by a cron job
+    pro_users = await db.users.find(
+        {"tier": "pro"},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    sent_count = 0
+    for user in pro_users:
+        # Get digest data
+        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+        items = await db.knowledge_items.find(
+            {"user_id": user["user_id"], "created_at": {"$gte": week_ago}},
+            {"_id": 0, "embedding": 0}
+        ).to_list(100)
+        
+        if items:
+            all_key_points = []
+            all_actions = []
+            for item in items:
+                analysis = item.get("analysis", {})
+                all_key_points.extend(analysis.get("key_points", []))
+                all_actions.extend(analysis.get("actions", []))
+            
+            digest_data = {
+                "item_count": len(items),
+                "top_insights": all_key_points[:10],
+                "pending_actions": all_actions[:10]
+            }
+            
+            background_tasks.add_task(
+                email_service.send_weekly_digest,
+                user["email"],
+                user["name"],
+                digest_data
+            )
+            sent_count += 1
+    
+    return {"message": f"Queued {sent_count} digest emails"}
+
 # Include router
 app.include_router(api_router)
 
