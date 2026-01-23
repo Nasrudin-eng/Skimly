@@ -127,6 +127,11 @@ Skimly reduces cognitive load and makes knowledge compound over time.
 - **Email Verification**: Token-based email verification system
 - **Weekly Digest Emails**: Automated email delivery for Pro users
 
+### Phase 5 - Polish ✅ (January 23, 2026)
+- **Dark Mode Toggle**: Theme context with localStorage persistence, toggle in Settings
+- **Background Scheduler**: APScheduler-based cron for weekly digest emails (Mondays 9AM UTC)
+- **Chrome Extension Complete**: Manifest V3, popup, content script, side panel, icons
+
 ---
 
 ## Pricing Tiers
